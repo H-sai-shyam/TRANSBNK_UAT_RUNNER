@@ -1,0 +1,18 @@
+{
+  "apiName" : "upi-mandate-create",
+  "request" : {
+    "entityId" : "2c59c369-67b2-42a7-afa5-4491a58a8e7c",
+    "programId" : "524",
+    "merchantId" : "TESTMERCHANT001",
+    "referenceNo" : "UPI-MANDATE-001",
+    "amount" : "10.00",
+    "frequency" : "MONTHLY",
+    "startDate" : "2026-03-01",
+    "endDate" : "2027-03-01",
+    "payerVpa" : "test@okhdfcbank"
+  },
+  "response" : {
+    "message" : "Missing Authentication Token"
+  },
+  "statusCode" : 403
+}

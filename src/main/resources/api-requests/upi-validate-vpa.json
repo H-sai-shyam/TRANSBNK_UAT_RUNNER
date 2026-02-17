@@ -1,0 +1,7 @@
+{
+  "entityId": "{{entityId}}",
+  "programId": "{{programId}}",
+  "merchantId": "TESTMERCHANT001",
+  "referenceNo": "UPI-VPA-TEST-001",
+  "vpa": "test@okhdfcbank"
+}

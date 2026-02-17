@@ -1,0 +1,14 @@
+{
+  "user": "test_user",
+  "password": "test_password",
+  "entityId": "{{entityId}}",
+  "programId": "{{programId}}",
+  "external1RefId": "NACH-TEST-001",
+  "customerName": "Test User",
+  "accountNumber": "123456789012",
+  "ifsc": "HDFC0001234",
+  "amount": "100.00",
+  "frequency": "MONTHLY",
+  "startDate": "2026-03-01",
+  "endDate": "2027-03-01"
+}

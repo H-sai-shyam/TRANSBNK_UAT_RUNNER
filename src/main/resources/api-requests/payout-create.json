@@ -1,0 +1,13 @@
+{
+  "entityId": "{{entityId}}",
+  "programId": "{{programId}}",
+  "custTxnRefNo": "PAYOUT-TEST-001",
+  "bankCode": "HDFC",
+  "payment": {
+    "txnType": "IMPS",
+    "amount": "1.00",
+    "beneficiaryName": "Test User",
+    "accountNumber": "123456789012",
+    "ifsc": "HDFC0001234"
+  }
+}

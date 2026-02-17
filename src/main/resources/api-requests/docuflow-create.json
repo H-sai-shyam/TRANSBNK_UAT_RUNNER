@@ -1,0 +1,9 @@
+{
+  "entityId": "{{entityId}}",
+  "programId": "{{programId}}",
+  "dealReferenceId": "DEAL-TEST-001",
+  "dealName": "UAT Test Deal",
+  "generateAgreement": false,
+  "initiateEsign": false,
+  "callbackURL": "https://webhook.site/your-id"
+}

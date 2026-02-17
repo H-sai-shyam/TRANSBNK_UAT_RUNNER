@@ -1,0 +1,20 @@
+{
+  "apiName" : "payout-create",
+  "request" : {
+    "entityId" : "2c59c369-67b2-42a7-afa5-4491a58a8e7c",
+    "programId" : "524",
+    "custTxnRefNo" : "PAYOUT-TEST-001",
+    "bankCode" : "HDFC",
+    "payment" : {
+      "txnType" : "IMPS",
+      "amount" : "1.00",
+      "beneficiaryName" : "Test User",
+      "accountNumber" : "123456789012",
+      "ifsc" : "HDFC0001234"
+    }
+  },
+  "response" : {
+    "message" : "Missing Authentication Token"
+  },
+  "statusCode" : 403
+}

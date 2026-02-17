@@ -1,0 +1,12 @@
+{
+  "apiName" : "docuflow-status",
+  "request" : {
+    "entityId" : "2c59c369-67b2-42a7-afa5-4491a58a8e7c",
+    "programId" : "524",
+    "dealReferenceId" : "DEAL-TEST-001"
+  },
+  "response" : {
+    "message" : "User: anonymous is not authorized to perform: execute-api:Invoke on resource: arn:aws:execute-api:ap-south-1:********2024:ku0arz20bk/api/POST/ with an explicit deny in a resource-based policy"
+  },
+  "statusCode" : 403
+}
