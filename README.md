@@ -7,26 +7,26 @@ http://localhost:8081
 Each API can be triggered using a POST call.
 
 ### Identity & Validation
-curl.exe -X POST http://localhost:8081/run/aadhaar-validation  
-curl.exe -X POST http://localhost:8081/run/bank-account-validation  
-curl.exe -X POST http://localhost:8081/run/vpa-validation  
+curl -X POST http://localhost:8081/run/aadhaar-validation  
+curl -X POST http://localhost:8081/run/bank-account-validation  
+curl -X POST http://localhost:8081/run/vpa-validation  
 
 ### Docuflow
-curl.exe -X POST http://localhost:8081/run/docuflow-create  
-curl.exe -X POST http://localhost:8081/run/docuflow-status  
-curl.exe -X POST http://localhost:8081/run/docuflow-resend  
-curl.exe -X POST http://localhost:8081/run/docuflow-cancel  
+curl -X POST http://localhost:8081/run/docuflow-create  
+curl -X POST http://localhost:8081/run/docuflow-status  
+curl -X POST http://localhost:8081/run/docuflow-resend  
+curl -X POST http://localhost:8081/run/docuflow-cancel  
 
 ### NACH
-curl.exe -X POST http://localhost:8081/run/nach-mandate-create  
-curl.exe -X POST http://localhost:8081/run/nach-status  
+curl -X POST http://localhost:8081/run/nach-mandate-create  
+curl -X POST http://localhost:8081/run/nach-status  
 
 ### UPI
-curl.exe -X POST http://localhost:8081/run/upi-validate-vpa  
-curl.exe -X POST http://localhost:8081/run/upi-mandate-create  
+curl -X POST http://localhost:8081/run/upi-validate-vpa  
+curl -X POST http://localhost:8081/run/upi-mandate-create  
 
 ### Payout
-curl.exe -X POST http://localhost:8081/run/payout-create  
+curl -X POST http://localhost:8081/run/payout-create  
 
 ## Output
 All responses are saved under:
