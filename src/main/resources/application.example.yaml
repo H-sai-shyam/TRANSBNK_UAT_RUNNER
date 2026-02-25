@@ -1,0 +1,29 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    # Update host/port and credentials for your environment.
+    url: 'jdbc:mariadb://<host>:<port>/transbnk?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Kolkata&tcpKeepAlive=true&connectTimeout=5000&socketTimeout=60000&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048'
+    username: '<db_user>'
+    password: '<db_password>'
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      max-lifetime: 1500000
+      keepalive-time: 300000
+      connection-test-query: SELECT 1
+
+logging:
+  level:
+    root: INFO
+    com.example.transbnk_uat_runner: DEBUG
+
+transbnk:
+  base-url: 'https://sandbox-api.trusthub.in'
+  api-key: '<default_api_key>'
+  bank-account-validation-api-key: '<bank_account_validation_api_key>'
+  entity-id: '<entity_uuid>'
+  program-id: 524
+  nach-program-id: 113

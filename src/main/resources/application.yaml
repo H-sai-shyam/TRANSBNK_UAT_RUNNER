@@ -1,8 +1,0 @@
-server:
-  port: 8081
-
-transbnk:
-  base-url: https://sandbox-api.trusthub.in
-  api-key: z9ma90n8aS1oe6HF4QXp352vAbrnzE424Y0HAJrp
-  entity-id: 2c59c369-67b2-42a7-afa5-4491a58a8e7c
-  program-id: 524

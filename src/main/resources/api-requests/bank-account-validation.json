@@ -1,4 +1,10 @@
 {
-  "account_number": "917010059496666",
-  "ifsc_code": "UTIB0001600"
+  "entityId": "{{entityId}}",
+  "programId": "{{programId}}",
+  "requestId": "REQ-0001",
+  "custName": "Test User",
+  "custIfsc": "ICIC0000000",
+  "custAcctNo": "000000000000",
+  "trackingRefNo": "TRACK-0001",
+  "txnType": "IMPS"
 }
