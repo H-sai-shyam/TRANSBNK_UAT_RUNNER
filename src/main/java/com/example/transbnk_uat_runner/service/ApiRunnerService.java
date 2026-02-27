@@ -3,6 +3,7 @@ package com.example.transbnk_uat_runner.service;
 import com.example.transbnk_uat_runner.model.ApiResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,20 +52,16 @@ public class ApiRunnerService {
 
     // ================= MAIN METHOD =================
     public ApiResult runApi(String apiName) throws Exception {
+        return runApi(apiName, null);
+    }
+
+    public ApiResult runApi(String apiName, JsonNode incomingRequest) throws Exception {
 
         log.info(" Running API: {}", apiName);
 
-        // Load request JSON
-        ClassPathResource resource =
-                new ClassPathResource("api-requests/" + apiName + ".json");
+        RequestPayload requestPayload = buildRequestPayload(apiName, incomingRequest);
 
-        InputStream is = resource.getInputStream();
-        String body = new String(is.readAllBytes(), StandardCharsets.UTF_8)
-                .replace("{{entityId}}", entityId)
-                .replace("{{programId}}", programId)
-                .replace("{{nachProgramId}}", nachProgramId);
-
-        log.debug(" Request body: {}", body);
+        log.debug(" Request body: {}", requestPayload.body());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -72,11 +69,11 @@ public class ApiRunnerService {
 
         log.debug(" Headers: {}", headers);
 
-        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        HttpEntity<String> request = new HttpEntity<>(requestPayload.body(), headers);
 
         ApiResult result = new ApiResult();
         result.setApiName(apiName);
-        result.setRequest(mapper.readTree(body));
+        result.setRequest(requestPayload.json());
         String endpointPath = endpoint(apiName);
         String url = baseUrl + endpointPath;
 
@@ -131,6 +128,50 @@ public class ApiRunnerService {
         return result;
     }
 
+    private RequestPayload buildRequestPayload(String apiName, JsonNode incomingRequest) throws Exception {
+        if (incomingRequest == null || incomingRequest.isNull()) {
+            ClassPathResource resource =
+                    new ClassPathResource("api-requests/" + apiName + ".json");
+
+            InputStream is = resource.getInputStream();
+            String body = new String(is.readAllBytes(), StandardCharsets.UTF_8)
+                    .replace("{{entityId}}", entityId)
+                    .replace("{{programId}}", programId)
+                    .replace("{{nachProgramId}}", nachProgramId);
+
+            return new RequestPayload(mapper.readTree(body), body);
+        }
+
+        JsonNode prepared = applyDefaults(incomingRequest);
+        return new RequestPayload(prepared, mapper.writeValueAsString(prepared));
+    }
+
+    private JsonNode applyDefaults(JsonNode incomingRequest) {
+        if (!(incomingRequest instanceof ObjectNode objectNode)) {
+            return incomingRequest;
+        }
+
+        ObjectNode copy = objectNode.deepCopy();
+        putIfMissing(copy, "entityId", entityId);
+        putIfMissing(copy, "programId", programId);
+        putIfMissing(copy, "nachProgramId", nachProgramId);
+        return copy;
+    }
+
+    private static void putIfMissing(ObjectNode node, String field, String value) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+
+        JsonNode existing = node.get(field);
+        if (existing == null || existing.isNull() || (existing.isValueNode() && existing.asText().isBlank())) {
+            node.put(field, value);
+        }
+    }
+
+    private record RequestPayload(JsonNode json, String body) {
+    }
+
     // ================= HELPERS =================
     private void classifyHttpStatus(int status, ApiResult result) {
         if (status >= 200 && status < 300) {
@@ -181,6 +222,24 @@ public class ApiRunnerService {
     }
 
     private void save(String apiName, ApiResult result) throws Exception {
+        if (result == null) {
+            return;
+        }
+
+        int statusCode = result.getStatusCode();
+        if (statusCode < 200 || statusCode >= 300) {
+            log.info(" Response file not saved (non-2xx) | apiName={} httpStatus={}", apiName, statusCode);
+            return;
+        }
+
+        if ("bank-account-validation".equals(apiName)) {
+            JsonNode responseJson = result.getResponse();
+            if (responseJson == null || !(responseJson.hasNonNull("statusCode") || responseJson.hasNonNull("status_code"))) {
+                log.info(" Response file not saved (missing statusCode) | apiName={} httpStatus={}", apiName, statusCode);
+                return;
+            }
+        }
+
         File dir = new File("responses");
         if (!dir.exists()) {
             dir.mkdirs();
@@ -188,9 +247,92 @@ public class ApiRunnerService {
         }
 
         File file = new File(dir, apiName + "-response.json");
-        mapper.writerWithDefaultPrettyPrinter().writeValue(file, result);
+        JsonNode customized = buildCustomizedResponse(apiName, result);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(file, customized);
 
         log.info(" Response saved: {}", file.getAbsolutePath());
+    }
+
+    public JsonNode buildCustomizedResponse(String apiName, ApiResult result) {
+        if (result == null) {
+            return mapper.createObjectNode();
+        }
+
+        JsonNode responseJson = result.getResponse();
+
+        if ("bank-account-validation".equals(apiName)) {
+            return buildBankAccountValidationCustomizedResponse(result);
+        }
+
+        return responseJson == null ? mapper.createObjectNode() : responseJson;
+    }
+
+    private JsonNode buildBankAccountValidationCustomizedResponse(ApiResult result) {
+        ObjectNode out = mapper.createObjectNode();
+
+        JsonNode requestJson = result.getRequest();
+        JsonNode responseJson = result.getResponse();
+
+        putIfNotBlank(out, "requestId", firstNonBlank(
+                jsonText(responseJson, "requestId"),
+                jsonText(requestJson, "requestId"),
+                jsonText(responseJson, "request_id"),
+                jsonText(requestJson, "request_id")
+        ));
+
+        putIfNotBlank(out, "statusCode", jsonText(responseJson, "statusCode"));
+        putIfNotBlank(out, "status", jsonText(responseJson, "status"));
+
+        String message = firstNonBlank(
+                jsonText(responseJson, "message"),
+                jsonText(responseJson, "Message"),
+                jsonText(responseJson, "error"),
+                jsonText(responseJson, "Error"),
+                jsonText(responseJson, "error_description"),
+                jsonText(responseJson, "errorDescription"),
+                jsonText(responseJson, "details")
+        );
+        if (message == null || message.isBlank()) {
+            if (result.getStatusCode() >= 400) {
+                message = "Downstream error (HTTP " + result.getStatusCode() + ")";
+            } else if (result.getBusinessStatus() != null && !result.getBusinessStatus().isBlank()) {
+                message = result.getBusinessStatus();
+            }
+        }
+        putIfNotBlank(out, "message", message);
+
+        ObjectNode data = mapper.createObjectNode();
+        putIfNotBlank(data, "acValidationStatus", jsonText(responseJson, "acValidationStatus"));
+        putIfNotBlank(data, "responseId", jsonText(responseJson, "responseId"));
+        putIfNotBlank(data, "nameAtBank", jsonText(responseJson, "nameAtBank"));
+        putIfNotBlank(data, "utr", jsonText(responseJson, "utr"));
+        if (!data.isEmpty()) {
+            out.set("data", data);
+        }
+
+        return out;
+    }
+
+    private static void putIfNotBlank(ObjectNode node, String fieldName, String value) {
+        if (node == null || fieldName == null || fieldName.isBlank()) {
+            return;
+        }
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        node.put(fieldName, value);
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private String apiKeyFor(String apiName) {

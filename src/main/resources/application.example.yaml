@@ -27,3 +27,12 @@ transbnk:
   entity-id: '<entity_uuid>'
   program-id: 524
   nach-program-id: 113
+
+wrapper:
+  # Wrapper token rules
+  token-expiry-minutes: 15
+  # Used in the token payload string (do not share)
+  transaction-password: '<wrapper_transaction_password>'
+  # AES key + IV must be Base64 strings (AES/CBC/PKCS5Padding). IV must decode to 16 bytes.
+  transaction-aes-key: '<base64_aes_key>'
+  transaction-iv: '<base64_iv_16_bytes>'
