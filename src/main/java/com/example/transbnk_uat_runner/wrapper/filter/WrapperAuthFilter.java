@@ -1,6 +1,7 @@
 package com.example.transbnk_uat_runner.wrapper.filter;
 
 import com.example.transbnk_uat_runner.wrapper.service.WrapperAuditService;
+import com.example.transbnk_uat_runner.wrapper.service.WrapperPayloadCryptoService;
 import com.example.transbnk_uat_runner.wrapper.service.WrapperTokenService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
@@ -23,12 +25,23 @@ public class WrapperAuthFilter extends OncePerRequestFilter {
 
 	private final WrapperTokenService tokenService;
 	private final WrapperAuditService auditService;
+	private final WrapperPayloadCryptoService payloadCryptoService;
 	private final ObjectMapper objectMapper;
 
-	public WrapperAuthFilter(WrapperTokenService tokenService, WrapperAuditService auditService, ObjectMapper objectMapper) {
+	private final boolean payloadRequired;
+
+	public WrapperAuthFilter(
+			WrapperTokenService tokenService,
+			WrapperAuditService auditService,
+			WrapperPayloadCryptoService payloadCryptoService,
+			ObjectMapper objectMapper,
+			@Value("${wrapper.payload-required:false}") boolean payloadRequired
+	) {
 		this.tokenService = tokenService;
 		this.auditService = auditService;
+		this.payloadCryptoService = payloadCryptoService;
 		this.objectMapper = objectMapper;
+		this.payloadRequired = payloadRequired;
 	}
 
 	@Override
@@ -61,25 +74,54 @@ public class WrapperAuthFilter extends OncePerRequestFilter {
 			FilterChain filterChain
 	) throws ServletException, IOException {
 		String token = extractBearerToken(request.getHeader("Authorization"));
+		if (token != null && !token.isBlank()) {
+			if (!tokenService.validateToken(token)) {
+				writeUnauthorizedWithAudit(request, response, "Invalid or expired token");
+				return;
+			}
+
+			filterChain.doFilter(request, response);
+			return;
+		}
+
+		CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(request);
+		String requestPayload = safeReadBody(cachedRequest);
+		token = extractTokenFromBody(requestPayload);
+
 		if (token == null || token.isBlank()) {
-			writeUnauthorizedWithAudit(request, response, "Authorization header is required");
+			writeUnauthorizedWithAudit(cachedRequest, response, "Authorization header or body token is required");
 			return;
 		}
 
 		if (!tokenService.validateToken(token)) {
-			writeUnauthorizedWithAudit(request, response, "Invalid or expired token");
+			writeUnauthorizedWithAudit(cachedRequest, response, "Invalid or expired token");
 			return;
 		}
 
-		filterChain.doFilter(request, response);
+		filterChain.doFilter(cachedRequest, response);
 	}
 
 	private void writeUnauthorizedWithAudit(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
 		String requestPayload = safeReadBody(request);
-		String requestId = extractRequestId(requestPayload);
-		String responsePayload = "{\"message\":\"" + sanitize(message) + "\"}";
 
-		auditService.writeAudit(requestId, requestPayload, responsePayload, "TOKEN_INVALID");
+		String encData = tryExtractEncData(requestPayload);
+		boolean encryptedMode = payloadRequired || (encData != null && !encData.isBlank());
+
+		String auditRequestPayload = requestPayload;
+		String requestId = extractRequestId(auditRequestPayload);
+		String plainResponsePayload = "{\"message\":\"" + sanitize(message) + "\"}";
+
+		auditService.writeAudit(requestId, auditRequestPayload, plainResponsePayload, "TOKEN_INVALID");
+
+		String responsePayload = plainResponsePayload;
+		if (encryptedMode) {
+			try {
+				String encrypted = payloadCryptoService.encryptPayload(plainResponsePayload);
+				responsePayload = "{\"encData\":\"" + sanitize(encrypted) + "\"}";
+			} catch (Exception ignored) {
+				// fall back to plain response payload
+			}
+		}
 
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -140,5 +182,45 @@ public class WrapperAuthFilter extends OncePerRequestFilter {
 		}
 		return value.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
-}
 
+	private String extractTokenFromBody(String requestPayload) {
+		if (requestPayload == null || requestPayload.isBlank()) {
+			return null;
+		}
+
+		try {
+			JsonNode json = objectMapper.readTree(requestPayload);
+			JsonNode token = json.get("token");
+			if (token != null && token.isValueNode() && !token.asText().isBlank()) {
+				return token.asText().trim();
+			}
+		} catch (Exception ignored) {
+			// ignore
+		}
+
+		return null;
+	}
+
+	private String tryExtractEncData(String requestPayload) {
+		if (requestPayload == null || requestPayload.isBlank()) {
+			return null;
+		}
+
+		try {
+			JsonNode json = objectMapper.readTree(requestPayload);
+			JsonNode encData = json.get("encData");
+			if (encData != null && encData.isValueNode() && !encData.asText().isBlank()) {
+				return encData.asText();
+			}
+
+			JsonNode encryptedData = json.get("encryptedData");
+			if (encryptedData != null && encryptedData.isValueNode() && !encryptedData.asText().isBlank()) {
+				return encryptedData.asText();
+			}
+		} catch (Exception ignored) {
+			// ignore
+		}
+
+		return null;
+	}
+}

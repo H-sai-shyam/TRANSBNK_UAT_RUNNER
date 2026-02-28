@@ -31,8 +31,13 @@ transbnk:
 wrapper:
   # Wrapper token rules
   token-expiry-minutes: 15
+  # When true, all /api/{apiName} requests must use encData and responses are returned as encData
+  payload-required: false
   # Used in the token payload string (do not share)
   transaction-password: '<wrapper_transaction_password>'
   # AES key + IV must be Base64 strings (AES/CBC/PKCS5Padding). IV must decode to 16 bytes.
   transaction-aes-key: '<base64_aes_key>'
   transaction-iv: '<base64_iv_16_bytes>'
+  # Optional: encrypt/decrypt request/response payloads (defaults to transaction key/iv)
+  payload-aes-key: '${wrapper.transaction-aes-key}'
+  payload-iv: '${wrapper.transaction-iv}'
