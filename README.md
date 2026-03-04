@@ -68,5 +68,5 @@ All of these are called as `POST /api/{apiName}` (token required):
 - TransBNK logging table(s) like `bank_account_validation_log` (already used by the module)
 
 ## Notes
-- Copy `src/main/resources/application.example.yaml` to `src/main/resources/application.yaml` for local runs (it is git-ignored).
+- Copy `src/main/resources/application.example.properties` to `src/main/resources/application.properties` for local runs (it is git-ignored).
 - `bank-account-validation` logs are inserted into `bank_account_validation_log`.
