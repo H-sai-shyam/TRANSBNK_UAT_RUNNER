@@ -9,8 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>transbnk-uat-runner</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>transbnk-uat-runner</name>
 	<description>DEMO MODULE FOR API CALLS</description>
 	<url/>
