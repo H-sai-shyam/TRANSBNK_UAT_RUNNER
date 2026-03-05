@@ -12,9 +12,10 @@ http://localhost:8081
 **PowerShell (Windows)**
 
 > Important: `transaction_timestamp` must be within the last 15 minutes, otherwise validation will fail as `expired`.
+> Token generation reads `transaction_userid` and `transaction_merchantid` from `client_profile` by `client_id`.
 
 ```powershell
-curl.exe --% -X POST "http://localhost:8081/api/v1/token/generate" -H "Content-Type: application/json" -d "{\"transaction_userid\":\"317161\",\"transaction_merchantid\":\"446442\",\"client_Id\":\"5e06f31d-d298-11f0-96ff-4201c0a81e02\",\"transaction_timestamp\":\"2026-02-27 09:10:00\",\"processor\":\"TRANSBANK\"}"
+curl.exe --% -X POST "http://localhost:8081/api/v1/token/generate" -H "Content-Type: application/json" -d "{\"client_Id\":\"5e06f31d-d298-11f0-96ff-4201c0a81e02\",\"transaction_timestamp\":\"2026-02-27 09:10:00\",\"processor\":\"TRANSBANK\"}"
 ```
 
 Validate token:
@@ -26,7 +27,7 @@ curl.exe --% -X POST "http://localhost:8081/api/v1/token/validate" -H "Content-T
 **Bash / Linux / macOS**
 
 ```bash
-curl -X POST "http://localhost:8081/api/v1/token/generate" -H "Content-Type: application/json" -d '{"transaction_userid":"317161","transaction_merchantid":"446442","client_Id":"5e06f31d-d298-11f0-96ff-4201c0a81e02","transaction_timestamp":"2026-02-27 09:10:00","processor":"TRANSBANK"}'
+curl -X POST "http://localhost:8081/api/v1/token/generate" -H "Content-Type: application/json" -d '{"client_Id":"5e06f31d-d298-11f0-96ff-4201c0a81e02","transaction_timestamp":"2026-02-27 09:10:00","processor":"TRANSBANK"}'
 ```
 
 ### 2) Call TransBNK APIs (Token Required)
@@ -64,6 +65,7 @@ All of these are called as `POST /api/{apiName}` (token required):
 
 ## DB Tables Required
 - `master_transactions` (wrapper tokens)
+- `client_profile` (clientId -> transaction user/merchant IDs)
 - `bank_validation_audit` (wrapper audit)
 - TransBNK logging table(s) like `bank_account_validation_log` (already used by the module)
 

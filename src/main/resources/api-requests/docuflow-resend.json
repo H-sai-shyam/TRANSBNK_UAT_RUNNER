@@ -1,5 +1,4 @@
 {
-  "entityId": "{{entityId}}",
-  "programId": "{{programId}}",
-  "dealReferenceId": "DEAL-TEST-001"
+  "dealReferenceId": "YBRDE000077",
+  "entityId": "{{entityId}}"
 }

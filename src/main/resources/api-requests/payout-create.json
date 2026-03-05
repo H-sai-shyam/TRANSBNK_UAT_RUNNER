@@ -1,13 +1,24 @@
 {
   "entityId": "{{entityId}}",
   "programId": "{{programId}}",
-  "custTxnRefNo": "PAYOUT-TEST-001",
-  "bankCode": "HDFC",
+  "bankCode": "INDB",
+  "customerId": "67456295",
+  "custTxnRefNo": "202409181400",
+  "externalReferenceNumber": "202409181400",
+  "debitAcctNo": "201025415507",
   "payment": {
     "txnType": "IMPS",
-    "amount": "1.00",
-    "beneficiaryName": "Test User",
-    "accountNumber": "123456789012",
-    "ifsc": "HDFC0001234"
-  }
+    "amount": 1,
+    "valueDate": "2024-05-31",
+    "benName": "Amit Kumar",
+    "benAcctNo": "200999514476",
+    "benIFSC": "INDB0008538",
+    "benEmail": "amit.kumar@example.com",
+    "benMobile": "6639999512",
+    "description": "Test API Data",
+    "remark1": "Test API Data 1",
+    "remark2": "Test API Data 2",
+    "remark3": "Test API Data 3"
+  },
+  "callbackUrl": "https://webhook.site/your-id"
 }

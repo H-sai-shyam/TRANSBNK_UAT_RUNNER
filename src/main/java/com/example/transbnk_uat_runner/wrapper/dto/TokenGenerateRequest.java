@@ -7,12 +7,10 @@ import jakarta.validation.constraints.Pattern;
 
 public class TokenGenerateRequest {
 
-	@NotBlank(message = "Transaction user ID is required")
 	@JsonProperty("transaction_userid")
 	@JsonAlias({"transactionUserId"})
 	private String transactionUserId;
 
-	@NotBlank(message = "Transaction merchant ID is required")
 	@JsonProperty("transaction_merchantid")
 	@JsonAlias({"transactionMerchantId"})
 	private String transactionMerchantId;

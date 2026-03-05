@@ -26,5 +26,5 @@
   "utilityCode": "NACH00000000000044",
   "sponsorBankIfsc": "YESB0000078",
   "schemeName": "Personal Loan",
-  "collectionUnitCancel": 0
+  "collectionUntilCancel": 1
 }

@@ -48,6 +48,9 @@ public class WrapperTokenService {
 			throw new IllegalArgumentException("Request is required");
 		}
 
+		ClientProfile clientProfile = findClientProfileByClientId(request.getClientId())
+				.orElseThrow(() -> new IllegalArgumentException("Unknown client_id (no client_profile mapping found)"));
+
 		String processor = normalizeProcessor(request.getProcessor());
 		LocalDateTime txnTimestamp = LocalDateTime.parse(request.getTransactionTimestamp(), TS_FORMATTER);
 
@@ -66,8 +69,8 @@ public class WrapperTokenService {
 		}
 
 		String normalizedTs = txnTimestamp.format(TS_FORMATTER);
-		String raw = String.valueOf(request.getTransactionUserId())
-				+ String.valueOf(request.getTransactionMerchantId())
+		String raw = clientProfile.transactionUserId()
+				+ clientProfile.transactionMerchantId()
 				+ String.valueOf(transactionPassword)
 				+ normalizedTs
 				+ processor;
@@ -102,8 +105,8 @@ public class WrapperTokenService {
 				orderReference,
 				encryptedToken,
 				Timestamp.valueOf(txnTimestamp),
-				request.getTransactionUserId(),
-				request.getTransactionMerchantId(),
+				clientProfile.transactionUserId(),
+				clientProfile.transactionMerchantId(),
 				request.getClientId(),
 				processor,
 				Timestamp.valueOf(now),
@@ -268,8 +271,42 @@ public class WrapperTokenService {
 		}
 	}
 
+	private Optional<ClientProfile> findClientProfileByClientId(String clientId) {
+		String sql = """
+				SELECT
+					client_id,
+					transaction_userid,
+					transaction_merchantid
+				FROM client_profile
+				WHERE client_id = ?
+				LIMIT 1
+				""";
+
+		try {
+			ClientProfile row = jdbcTemplate.queryForObject(
+					sql,
+					(rs, rowNum) -> new ClientProfile(
+							rs.getString("client_id"),
+							rs.getString("transaction_userid"),
+							rs.getString("transaction_merchantid")
+					),
+					clientId
+			);
+			return Optional.ofNullable(row);
+		} catch (EmptyResultDataAccessException ex) {
+			return Optional.empty();
+		}
+	}
+
 	private static LocalDateTime toLdt(Timestamp ts) {
 		return ts == null ? null : ts.toLocalDateTime();
+	}
+
+	private record ClientProfile(
+			String clientId,
+			String transactionUserId,
+			String transactionMerchantId
+	) {
 	}
 
 	private record MasterTransaction(

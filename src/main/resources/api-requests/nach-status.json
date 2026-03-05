@@ -1,5 +1,7 @@
 {
+  "user": "REPLACE_ME",
+  "password": "REPLACE_ME",
+  "nachRefNo": "NACH-REF-0001",
   "entityId": "{{entityId}}",
-  "programId": "{{programId}}",
-  "external1RefId": "NACH-TEST-001"
+  "programId": "{{nachProgramId}}"
 }

@@ -441,21 +441,21 @@ public class ApiRunnerService {
     private String endpoint(String apiName) {
         return switch (apiName) {
             case "aadhaar-validation" -> "/basic-aadhaar-validation";
-            case "bank-account-validation" -> "/bank-validateacct";
-            case "vpa-validation" -> "/validate-vpa";
+            case "bank-account-validation" -> "/validate-acct-3";
+            case "vpa-validation" -> "/vpa-lookup";
 
             case "docuflow-create" -> "/docuflow-1call";
             case "docuflow-status" -> "/docuflow-status";
-            case "docuflow-resend" -> "/docuflow-resend";
+            case "docuflow-resend" -> "/docuflow-resend-link";
             case "docuflow-cancel" -> "/docuflow-cancel";
 
             case "nach-mandate-create" -> "/nach-mandate-request";
-            case "nach-status" -> "/nach-status";
+            case "nach-status" -> "/nach-mandate-status";
 
-            case "upi-validate-vpa" -> "/upi/validate-vpa";
-            case "upi-mandate-create" -> "/upi/mandate/create";
+            case "upi-validate-vpa" -> "/upiap-validate-vpa";
+            case "upi-mandate-create" -> "/upiap-mandate-request";
 
-            case "payout-create" -> "/payout";
+            case "payout-create" -> "/bank-payout";
 
             default -> throw new RuntimeException("Unknown apiName: " + apiName);
         };

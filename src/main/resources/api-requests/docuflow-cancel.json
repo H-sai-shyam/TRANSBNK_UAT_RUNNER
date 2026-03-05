@@ -1,6 +1,4 @@
 {
-  "entityId": "{{entityId}}",
-  "programId": "{{programId}}",
-  "dealReferenceId": "DEAL-TEST-001",
-  "cancelReason": "UAT testing"
+  "dealReferenceId": "YBRDE000077",
+  "entityId": "{{entityId}}"
 }

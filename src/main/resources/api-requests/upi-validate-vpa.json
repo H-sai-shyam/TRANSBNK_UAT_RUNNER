@@ -1,7 +1,15 @@
 {
   "entityId": "{{entityId}}",
   "programId": "{{programId}}",
-  "merchantId": "TESTMERCHANT001",
-  "referenceNo": "UPI-VPA-TEST-001",
-  "vpa": "test@okhdfcbank"
+  "merchantId": "IDSM322018000242",
+  "referenceNo": "ValidateTest2001400007",
+  "vpa": "vijaytiwari1720-2@okhdfcbank",
+  "merchantMobile": "1234567890",
+  "merchantDeviceGeoCode": "NA",
+  "merchantDeviceLocation": "NA",
+  "merchantDeviceIP": "10.58.175.113",
+  "merchantDeviceType": "MOB",
+  "merchantDeviceId": "OP123456",
+  "merchantDeviceOS": "ANDROID",
+  "merchantDeviceAppName": "GPAY"
 }

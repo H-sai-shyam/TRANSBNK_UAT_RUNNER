@@ -13,7 +13,7 @@
 	<version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>transbank</name>
-	<description>DEMO MODULE FOR API CALLS</description>
+	<description>MODULE FOR API CALLS</description>
 	<url/>
 	<licenses>
 		<license/>
